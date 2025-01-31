@@ -1,9 +1,8 @@
 {
   "name": "@hexlet/code",
-  "version": "1.0.0",
-  "type": "module",
+  "version": "1.0.0",  
   "description": "A simplified version of Slack chat",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "build": "npm run build --prefix frontend",
     "start": "start-server -s ./frontend/dist",
