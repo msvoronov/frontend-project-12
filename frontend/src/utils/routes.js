@@ -1,6 +1,12 @@
+const apiPath = '/api/v1';
+
 export const routes = {
   notFound: '*',
   chat: '/',
   login: '/login',
-  signup: '/signup',  
+  signup: '/signup',
+};
+
+export const apiRoutes = {
+  loginPath: () => [apiPath, 'login'].join('/'),
 };
