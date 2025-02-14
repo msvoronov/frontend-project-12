@@ -1,37 +1,68 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import cn from 'classnames';
-import { apiRoutes } from '../utils/routes.js';
-import { actions as actionsChannels } from '../slices/channelsSlice.js';
-import { actions as actionsMessages } from '../slices/messagesSlice.js';
-
-const getAuthHeader = () => {
-  const userId = JSON.parse(localStorage.getItem('userId'));
-  if (userId && userId.token) {
-    return { Authorization: `Bearer ${userId.token}` };
-  }
-  return {};
-};
+import { useFormik } from 'formik';
+import { changeChannel, getChannels } from '../slices/channelsSlice.js';
+import { getMessages, sendMessage, addMessage } from '../slices/messagesSlice.js';
+import useApi from '../hooks/useApi.js';
 
 const Chat = () => {
+  const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
   const messages = useSelector((state) => state.messages);
   const dispatch = useDispatch();
+  const { socket } = useApi();
 
   useEffect(() => {
-    const requestData = async () => {
-      const header = getAuthHeader();
+    dispatch(getChannels(auth.token));
+    dispatch(getMessages(auth.token));
 
-      const response1 = await axios.get(apiRoutes.channelsPath(), { headers: header });
-      response1.data.forEach((channel) => dispatch(actionsChannels.addChannel({ channel })));
+    document.querySelector('input[name="body"]').focus();
 
-      const response2 = await axios.get(apiRoutes.messagesPath(), { headers: header });
-      response2.data.forEach((message) => dispatch(actionsMessages.addMessage({ message })));
+    const handleNewMessage = (payload) => {      
+      dispatch(addMessage(payload));
     };
-    requestData();
+    // const handleNewChannel = (payload) => {
+    //   dispatch(addChannel(payload));
+    // };
+    // const handleRemoveChannel = (payload) => {
+    //   dispatch(removeChannel(payload));
+    // };
+    // const handleRenameChannel = (payload) => {
+    //   dispatch(renameChannel(payload));
+    // };
+
+    // обернуть это в абстракцию может быть    
+    socket.on('newMessage', (payload) => {
+      handleNewMessage(payload)
+    });
+    // socket.on('newChannel', (payload) => handleNewChannel(payload));
+    // socket.on('removeChannel', (payload) => handleRemoveChannel(payload));
+    // socket.on('renameChannel', (payload) => handleRenameChannel(payload));
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+      // socket.off('newChannel', handleNewChannel);
+      // socket.off('removeChannel', handleRemoveChannel);
+      // socket.off('renameChannel', handleRenameChannel);
+    };
   }, []);
 
+  const handleChangeChannel = (id) => {
+    dispatch(changeChannel({ id }));
+    document.querySelector('input[name="body"]').focus();
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      body: '',
+    },
+    onSubmit: (values, { resetForm } ) => {      
+      const message = { body: values.body, channelId: channels.currentChannelId, username: auth.username };
+      const data = {message, token: auth.token};
+      dispatch(sendMessage(data));
+      resetForm();
+    },
+  });
   return (
     <div className="d-flex flex-column h-100">
       <p>{JSON.stringify(channels, null, ' ')}</p>
@@ -54,7 +85,7 @@ const Chat = () => {
                 const { name } = channels.entities[id];
                 return (
                   <li className="nav-item w-100" key={id}>
-                    <button type="button" className={cn('w-100', 'rounded-0', 'text-start', 'btn', { 'btn-secondary': id === channels.currentChannelId })}>
+                    <button type="button" className={cn('w-100', 'rounded-0', 'text-start', 'btn', { 'btn-secondary': id === channels.currentChannelId })} onClick={() => handleChangeChannel(id)}>
                       <span className="me-1">#</span>
                       {name}
                     </button>
@@ -66,8 +97,8 @@ const Chat = () => {
           <div className="col p-0 h-100">
             <div className="d-flex flex-column h-100">
               <div className="bg-light mb-4 p-3 shadow-sm small">
-                <p className="m-0"><b># general</b></p>
-                <span className="text-muted">0 сообщений</span>
+                <p className="m-0"><b># {channels.entities[channels.currentChannelId]?.name}</b></p>
+                <span className="text-muted">{messages.ids.filter((id) => messages.entities[id].channelId === channels.currentChannelId).length} сообщений</span>
               </div>
               <div id="messages-box" className="chat-messages overflow-auto px-5 ">
                 {messages.ids.map((id) => {
@@ -87,9 +118,16 @@ const Chat = () => {
                 })}
               </div>
               <div className="mt-auto px-5 py-3">
-                <form noValidate="" className="py-1 border rounded-2">
+                <form noValidate="" className="py-1 border rounded-2" onSubmit={formik.handleSubmit}>
                   <div className="input-group has-validation">
-                    <input name="body" aria-label="Новое сообщение" placeholder="Введите сообщение..." className="border-0 p-0 ps-2 form-control" value="" />
+                    <input
+                      name="body"
+                      aria-label="Новое сообщение"
+                      placeholder="Введите сообщение..."
+                      className="border-0 p-0 ps-2 form-control"
+                      onChange={formik.handleChange}
+                      value={formik.values.body}
+                    />
                     <button type="submit" disabled="" className="btn btn-group-vertical">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
                         <path fillRule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />

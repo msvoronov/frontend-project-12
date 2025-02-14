@@ -1,14 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import AuthProvider from './components/AuthProvider.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx';
+import PrivateRoute from './routes/PrivateRoute.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Login from './pages/Login.jsx';
 import Chat from './pages/Chat.jsx';
-import { routes } from './utils/routes.js';
+import { routes } from './routes/routes.js';
 
 const App = () => (
-  <AuthProvider>
     <BrowserRouter>
       <Routes>
         <Route path={routes.notFound} element={<NotFound />} />
@@ -23,7 +21,6 @@ const App = () => (
         />
       </Routes>
     </BrowserRouter>
-  </AuthProvider>
 );
 
 export default App;

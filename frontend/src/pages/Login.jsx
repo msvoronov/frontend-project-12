@@ -1,17 +1,25 @@
 import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import avatar from '../assets/avatar.jpg';
-import { apiRoutes, routes } from '../utils/routes.js';
-import useAuth from '../hooks/index.js';
+import { routes } from '../routes/routes.js';
+import { logIn } from '../slices/authSlice.js';
 
 const Login = () => {
-  const auth = useAuth();
+  const auth = useSelector(state => state.auth);
+  const dispatch = useDispatch();  
   const navigate = useNavigate();
 
   useEffect(() => {
     if (auth.loggedIn) navigate(routes.chat);
+
+    const controls = document.querySelectorAll('.form-control');
+    if (auth.status === 'failed') {
+      controls.forEach((control) => control.classList.add('is-invalid'));
+    } else {
+      controls.forEach((control) => control.classList.remove('is-invalid'));
+    }
   });
 
   const formik = useFormik({
@@ -19,19 +27,7 @@ const Login = () => {
       username: '',
       password: '',
     },
-    onSubmit: async (values) => {
-      const controls = document.querySelectorAll('.form-control');
-
-      try {
-        controls.forEach((control) => control.classList.remove('is-invalid'));
-        const response = await axios.post(apiRoutes.loginPath(), values);
-        const data = JSON.stringify(response.data);
-        auth.logIn(data);
-        navigate(routes.chat);
-      } catch {
-        controls.forEach((control) => control.classList.add('is-invalid'));
-      }
-    },
+    onSubmit: (values) => dispatch(logIn(values)),
   });
   return (
     <div className="d-flex flex-column h-100">
