@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import PrivateRoute from './routes/PrivateRoute.jsx';
@@ -7,20 +8,20 @@ import Chat from './pages/Chat.jsx';
 import { routes } from './routes/routes.js';
 
 const App = () => (
-    <BrowserRouter>
-      <Routes>
-        <Route path={routes.notFound} element={<NotFound />} />
-        <Route path={routes.login} element={<Login />} />
-        <Route
-          path={routes.chat}
-          element={(
-            <PrivateRoute>
-              <Chat />
-            </PrivateRoute>
+  <BrowserRouter>
+    <Routes>
+      <Route path={routes.notFound} element={<NotFound />} />
+      <Route path={routes.login} element={<Login />} />
+      <Route
+        path={routes.chat}
+        element={(
+          <PrivateRoute>
+            <Chat />
+          </PrivateRoute>
           )}
-        />
-      </Routes>
-    </BrowserRouter>
+      />
+    </Routes>
+  </BrowserRouter>
 );
 
 export default App;

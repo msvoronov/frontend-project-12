@@ -8,7 +8,7 @@ export const logIn = createAsyncThunk(
   'auth/logIn',
   async (values) => {
     const response = await axios.post(apiRoutes.loginPath(), values);
-    return response.data;    
+    return response.data;
   },
 );
 
@@ -28,32 +28,32 @@ const authSlice = createSlice({
       state.token = '';
       state.username = '';
       state.loggedIn = false;
-      state.status = 'idle',
-      state.error = null,
+      state.status = 'idle';
+      state.error = null;
       localStorage.removeItem('auth');
     },
   },
   extraReducers: (builder) => {
-      builder
-        .addCase(logIn.pending, (state) => {
-          state.status = 'loading';
-          state.error = null;
-        })
-        .addCase(logIn.fulfilled, (state, action) => {
-          state.status = 'succeeded';
-          state.error = null;
+    builder
+      .addCase(logIn.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(logIn.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
 
-          const auth = action.payload;
-          state.token = auth.token;
-          state.username = auth.username;
-          state.loggedIn = true;          
-          localStorage.setItem('auth', JSON.stringify(auth));
-        })
-        .addCase(logIn.rejected, (state, action) => {
-          state.status = 'failed';
-          state.error = action.error.message;
-        });
-    }, 
+        const auth = action.payload;
+        state.token = auth.token;
+        state.username = auth.username;
+        state.loggedIn = true;
+        localStorage.setItem('auth', JSON.stringify(auth));
+      })
+      .addCase(logIn.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      });
+  },
 });
 
 export default authSlice.reducer;

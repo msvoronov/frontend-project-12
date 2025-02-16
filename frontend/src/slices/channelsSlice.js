@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { current, createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { apiRoutes } from '../routes/routes.js';
 
@@ -11,25 +11,23 @@ export const getChannels = createAsyncThunk(
     return response.data;
   },
 );
-export const addChannel = createAsyncThunk(
-  'channels/addChannel',
-  async (task) => {
-    const { data } = await axios.post(routes.tasksPath(), task);
-    return data;
+export const sendNewChannel = createAsyncThunk(
+  'channels/sendNewChannel',
+  async ({ channel, token }) => {
+    const response = await axios.post(apiRoutes.channelsPath(), channel, { headers: { Authorization: `Bearer ${token}` } });
+    return response.data;
   },
 );
-export const editChannel = createAsyncThunk(
-  'channels/editChannel',
-  async (task) => {
-    const { data } = await axios.post(routes.tasksPath(), task);
-    return data;
+export const sendRenameChannel = createAsyncThunk(
+  'channels/sendRenameChannel',
+  async ({ channel, token }) => {
+    await axios.patch(apiRoutes.channelPath(channel.id), { name: channel.name }, { headers: { Authorization: `Bearer ${token}` } });
   },
 );
-export const removeChannel = createAsyncThunk(
-  'channels/removeChannel',
-  async (id) => {
-    await axios.delete(routes.taskPath(id));
-    return id;
+export const sendRemoveChannel = createAsyncThunk(
+  'channels/sendRemoveChannel',
+  async ({ id, token }) => {
+    await axios.delete(apiRoutes.channelPath(id), { headers: { Authorization: `Bearer ${token}` } });
   },
 );
 
@@ -43,8 +41,28 @@ const channelsSlice = createSlice({
   reducers: {
     changeChannel(state, action) {
       const { id } = action.payload;
-      state.currentChannelId= id;
-    },    
+      state.currentChannelId = id;
+    },
+    addChannel(state, action) {
+      const channel = action.payload;
+      state.entities[channel.id] = channel;
+      state.ids.push(channel.id);
+    },
+    renameChannel(state, action) {
+      const channel = action.payload;
+      state.entities[channel.id] = channel;
+    },
+    removeChannel(state, action) {
+      const idToDelete = action.payload.id;
+      state.currentChannelId = state.currentChannelId === idToDelete ? '1' : state.currentChannelId;
+
+      const stateBeforeDelete = current(state);
+      const newIds = stateBeforeDelete.ids.filter((id) => id !== idToDelete);
+      const newEntitiess = Object.entries(stateBeforeDelete.entities)
+        .filter(([id]) => id !== idToDelete);
+      state.ids = newIds;
+      state.entities = Object.fromEntries(newEntitiess);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -54,23 +72,19 @@ const channelsSlice = createSlice({
           state.entities[channel.id] = channel;
           state.ids.push(channel.id);
         });
-      })      
-      .addCase(addChannel.fulfilled, (state, action) => {
-        const channel = action.payload;
-        state.entities[channel.id] = channel;
-        state.ids.push(channel.id);
       })
-      .addCase(editChannel.fulfilled, (state, action) => {
-        const id = action.payload;
-        state.currentChannelId= id;
+      .addCase(sendNewChannel.fulfilled, (state, action) => {
+        const { id } = action.payload;
+        state.currentChannelId = id;
       })
-      .addCase(removeChannel.fulfilled, (state, action) => {
-        const id = action.payload;
-        // удалить канал
-      })
-      .addCase(getChannels.rejected, (state, action) => (console.log(action.error)));
-  },  
+      .addCase(getChannels.rejected, (state, action) => (console.log(action.error)))
+      .addCase(sendNewChannel.rejected, (state, action) => (console.log(action.error)))
+      .addCase(sendRenameChannel.rejected, (state, action) => (console.log(action.error)))
+      .addCase(sendRemoveChannel.rejected, (state, action) => (console.log(action.error)));
+  },
 });
 
-export const { changeChannel } = channelsSlice.actions;
+export const {
+  changeChannel, addChannel, renameChannel, removeChannel,
+} = channelsSlice.actions;
 export default channelsSlice.reducer;

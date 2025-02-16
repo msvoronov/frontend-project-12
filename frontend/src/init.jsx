@@ -4,8 +4,8 @@ import store from './slices/index.js';
 import App from './App';
 
 // инит i18n, создать компонент реакт и обернть Provider в него
-const init = () => (  
-  <ApiContextProvider>  
+const init = () => (
+  <ApiContextProvider>
     <Provider store={store}>
       <App />
     </Provider>

@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react';
-import { io } from 'socket.io-client'
+import { io } from 'socket.io-client';
 import ApiContext from './ApiContext.js';
 
 const ApiContextProvider = ({ children }) => {
   const socket = io();
   // оставить только сокет, остальное закомменировать и делать без емитов
-  const value = useMemo(() => {
+  const value = useMemo(
+    () =>
     // const addNewMessage = (message, cb) => {
     //   socket.emit("newMessage", message, (response) => {
     //     cb(response)
-    //   });      
+    //   });
     // };
     // const addNewChannel = (channel, cb) => {
     //   socket.emit("newChannel", channel, (response) => {
@@ -26,14 +27,15 @@ const ApiContextProvider = ({ children }) => {
     //     cb(response)
     //   });
     // };
-    return {
+      ({
       // addNewMessage,
       // addNewChannel,
       // renameChannel,
       // removeChannel,
-      socket,
-    }
-  }, [socket]);  
+        socket,
+      }),
+    [socket],
+  );
 
   return (
     <ApiContext.Provider value={value}>
