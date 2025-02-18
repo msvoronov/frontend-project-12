@@ -11,6 +11,13 @@ export const logIn = createAsyncThunk(
     return response.data;
   },
 );
+export const signUp = createAsyncThunk(
+  'auth/signUp',
+  async (values) => {
+    const response = await axios.post(apiRoutes.signupPath(), values);
+    return response.data;
+  },
+);
 
 const isLoggedIn = () => !!localStorage.getItem('auth');
 
@@ -35,6 +42,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // logIn
       .addCase(logIn.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -52,8 +60,28 @@ const authSlice = createSlice({
       .addCase(logIn.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+      // signUp
+      .addCase(signUp.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(signUp.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+
+        const auth = action.payload;
+        state.token = auth.token;
+        state.username = auth.username;
+        state.loggedIn = true;
+        localStorage.setItem('auth', JSON.stringify(auth));
+      })
+      .addCase(signUp.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
       });
   },
 });
 
+export const { logOut } = authSlice.actions;
 export default authSlice.reducer;

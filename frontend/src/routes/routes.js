@@ -9,6 +9,7 @@ export const routes = {
 
 export const apiRoutes = {
   loginPath: () => [apiPath, 'login'].join('/'),
+  signupPath: () => [apiPath, 'signup'].join('/'),
   channelsPath: () => [apiPath, 'channels'].join('/'),
   channelPath: (id) => [apiPath, 'channels', id].join('/'),
   messagesPath: () => [apiPath, 'messages'].join('/'),

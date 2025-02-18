@@ -4,38 +4,7 @@ import ApiContext from './ApiContext.js';
 
 const ApiContextProvider = ({ children }) => {
   const socket = io();
-  // оставить только сокет, остальное закомменировать и делать без емитов
-  const value = useMemo(
-    () =>
-    // const addNewMessage = (message, cb) => {
-    //   socket.emit("newMessage", message, (response) => {
-    //     cb(response)
-    //   });
-    // };
-    // const addNewChannel = (channel, cb) => {
-    //   socket.emit("newChannel", channel, (response) => {
-    //     cb(response)
-    //   });
-    // };
-    // const renameChannel = (channel, cb) => {
-    //   socket.emit("renameChannel", channel, (response) => {
-    //     cb(response)
-    //   });
-    // };
-    // const removeChannel = (channel, cb) => {
-    //   socket.emit("removeChannel", channel, (response) => {
-    //     cb(response)
-    //   });
-    // };
-      ({
-      // addNewMessage,
-      // addNewChannel,
-      // renameChannel,
-      // removeChannel,
-        socket,
-      }),
-    [socket],
-  );
+  const value = useMemo(() => ({ socket }), [socket]);
 
   return (
     <ApiContext.Provider value={value}>

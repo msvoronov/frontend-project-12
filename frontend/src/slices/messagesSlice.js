@@ -37,8 +37,13 @@ const messagesSlice = createSlice({
       .addCase(removeChannel, (state, action) => {
         const channelIdToDelete = action.payload.id;
         const stateBeforeDelete = current(state);
-        const newEntitiess = Object.entries(stateBeforeDelete.entities).filter(([id, message]) => message.channelId !== channelIdToDelete);
-        const newIds = newEntitiess.map(([id, message]) => id);
+        const newEntitiess = Object
+          .entries(stateBeforeDelete.entities)
+          .filter((entries) => {
+            const message = entries[1];
+            return message.channelId !== channelIdToDelete;
+          });
+        const newIds = newEntitiess.map(([id]) => id);
         state.ids = newIds;
         state.entities = Object.fromEntries(newEntitiess);
       })
