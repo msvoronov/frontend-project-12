@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import { Modal, Form, Button } from 'react-bootstrap';
 import * as yup from 'yup';
+import { useTranslation } from 'react-i18next';
 import { sendNewChannel } from '../slices/channelsSlice.js';
 import { hideModal } from '../slices/modalSlice.js';
 
@@ -10,6 +11,7 @@ const Add = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
+  const { t } = useTranslation();
   const channelsName = Object.values(channels.entities)
     .map((channel) => channel.name);
 
@@ -21,10 +23,10 @@ const Add = () => {
   const schema = yup.object().shape({
     name: yup
       .string()
-      .min(3, 'От 3 до 20 символов')
-      .max(20, 'От 3 до 20 символов')
-      .required('Обязательное поле')
-      .notOneOf(channelsName, 'Должно быть уникальным'),
+      .min(3, t('add.schema.min3'))
+      .max(20, t('add.schema.max20'))
+      .required(t('add.schema.required'))
+      .notOneOf(channelsName, t('add.schema.mustUnique')),
   });
 
   const formik = useFormik({
@@ -42,7 +44,7 @@ const Add = () => {
     <Modal show aria-labelledby="contained-modal-title-vcenter" centered onHide={() => dispatch(hideModal())}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Добавить канал
+          {t('add.title')}
         </Modal.Title>
       </Modal.Header>
 
@@ -58,11 +60,11 @@ const Add = () => {
               name="name"
               isInvalid={formik.errors.name && formik.touched.name}
             />
-            <Form.Label visuallyHidden>Имя канала</Form.Label>
+            <Form.Label visuallyHidden>{t('add.name')}</Form.Label>
             <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
             <div className="d-flex justify-content-end">
-              <Button type="button" variant="secondary" className="me-2" onClick={() => dispatch(hideModal())}>Отменить</Button>
-              <Button type="submit" variant="primary">Отправить</Button>
+              <Button type="button" variant="secondary" className="me-2" onClick={() => dispatch(hideModal())}>{t('add.cancel')}</Button>
+              <Button type="submit" variant="primary">{t('add.send')}</Button>
             </div>
           </Form.Group>
         </Form>

@@ -5,6 +5,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import avatarLogin from '../assets/avatarLogin.jpg';
 import { routes } from '../routes/routes.js';
 import { logIn } from '../slices/authSlice.js';
@@ -14,6 +15,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const inputRef = useRef();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (auth.loggedIn) navigate(routes.chat);
@@ -39,41 +41,41 @@ const Login = () => {
                 <Image src={avatarLogin} roundedCircle alt="Войти" />
               </div>
               <Form className="col-12 col-md-6 mt-3 mt-md-0" onSubmit={formik.handleSubmit}>
-                <h1 className="text-center mb-4">Войти</h1>
+                <h1 className="text-center mb-4">{t('login.enter')}</h1>
                 <Form.Group className="form-floating mb-3" controlId="username">
                   <Form.Control
                     name="username"
                     autoComplete="username"
                     required
-                    placeholder="Ваш ник"
+                    placeholder={t('login.username')}
                     ref={inputRef}
                     onChange={formik.handleChange}
                     value={formik.values.username}
                     isInvalid={auth.status === 'failed'}
                   />
-                  <Form.Label>Ваш ник</Form.Label>
+                  <Form.Label>{t('login.username')}</Form.Label>
                 </Form.Group>
                 <Form.Group className="form-floating mb-4" controlId="password">
                   <Form.Control
                     name="password"
                     autoComplete="current-password"
                     required
-                    placeholder="Пароль"
+                    placeholder={t('login.password')}
                     type="password"
                     onChange={formik.handleChange}
                     value={formik.values.password}
                     isInvalid={auth.status === 'failed'}
                   />
-                  <Form.Label>Пароль</Form.Label>
-                  <Form.Control.Feedback tooltip type="invalid">Неверные имя пользователя или пароль</Form.Control.Feedback>
+                  <Form.Label>{t('login.password')}</Form.Label>
+                  <Form.Control.Feedback tooltip type="invalid">{t('login.feedback')}</Form.Control.Feedback>
                 </Form.Group>
-                <Button type="submit" className="w-100 mb-3" variant="outline-primary">Войти</Button>
+                <Button type="submit" className="w-100 mb-3" variant="outline-primary">{t('login.enter')}</Button>
               </Form>
             </Card.Body>
             <Card.Footer className="p-4">
               <div className="text-center">
-                <span>Нет аккаунта? </span>
-                <a href="/signup">Регистрация</a>
+                <span>{t('login.noAccount')}</span>
+                <a href="/signup">{t('login.registration')}</a>
               </div>
             </Card.Footer>
           </Card>

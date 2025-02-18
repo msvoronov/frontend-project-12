@@ -5,6 +5,7 @@ import {
 } from 'react-bootstrap';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
+import { useTranslation } from 'react-i18next';
 import {
   changeChannel, getChannels, addChannel, renameChannel, removeChannel,
 } from '../slices/channelsSlice.js';
@@ -20,40 +21,27 @@ const Chat = () => {
   const messages = useSelector((state) => state.messages);
   const dispatch = useDispatch();
   const { socket } = useApi();
-
   const inputRef = useRef();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (channels.ids.length === 0) {
+      dispatch(getChannels(auth.token));
+      dispatch(getMessages(auth.token));
+    }
+  }, [auth.token, dispatch, channels.ids.length]);
+
   useEffect(() => {
     inputRef.current.focus();
-  }, []);
 
-  useEffect(() => {
-    dispatch(getChannels(auth.token));
-    dispatch(getMessages(auth.token));
+    socket.on('newMessage', (payload) => dispatch(addMessage(payload)));
+    socket.on('newChannel', (payload) => dispatch(addChannel(payload)));
+    socket.on('renameChannel', (payload) => dispatch(renameChannel(payload)));
+    socket.on('removeChannel', (payload) => dispatch(removeChannel(payload)));
 
-    const handleNewMessage = (payload) => {
-      dispatch(addMessage(payload));
-    };
-    const handleNewChannel = (payload) => {
-      dispatch(addChannel(payload));
-    };
-    const handleRenameChannel = (payload) => {
-      dispatch(renameChannel(payload));
-    };
-    const handleRemoveChannel = (payload) => {
-      dispatch(removeChannel(payload));
-    };
-
-    // обернуть это в абстракцию может быть
-    socket.on('newMessage', (payload) => handleNewMessage(payload));
-    socket.on('newChannel', (payload) => handleNewChannel(payload));
-    socket.on('renameChannel', (payload) => handleRenameChannel(payload));
-    socket.on('removeChannel', (payload) => handleRemoveChannel(payload));
-
+    // Выполняется при размонтировании компонента
     return () => {
-      socket.off('newMessage', handleNewMessage);
-      socket.off('newChannel', handleNewChannel);
-      socket.off('renameChannel', handleRenameChannel);
-      socket.off('removeChannel', handleRemoveChannel);
+      socket.disconnect(); // вместо нескольких socket.off()
     };
   }, [auth.token, dispatch, socket]);
 
@@ -66,11 +54,15 @@ const Chat = () => {
 
   const handleChangeChannel = (id) => {
     dispatch(changeChannel({ id }));
-    document.querySelector('input[name="body"]').focus();
+    inputRef.current.focus();
   };
 
+  const countMessages = () => messages.ids
+    .filter((id) => messages.entities[id].channelId === channels.currentChannelId)
+    .length;
+
   const schema = yup.object().shape({
-    body: yup.string().trim().required(), // до проверки required обрезаем концевые пробелы
+    body: yup.string().trim().required(), // сразу обрезаем концевые пробелы
   });
   const formik = useFormik({
     initialValues: {
@@ -96,7 +88,7 @@ const Chat = () => {
         <Row className="h-100 bg-white flex-md-row">
           <Col className="col-4 col-md-2 border-end px-0 bg-light flex-column h-100 d-flex">
             <div className="d-flex mt-1 justify-content-between mb-2 ps-4 pe-2 p-4">
-              <b>Каналы</b>
+              <b>{t('chat.channels')}</b>
               <Button type="button" className="p-0 text-primary" variant="group-vertical" onClick={() => dispatch(showModal({ type: 'add' }))}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
                   <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
@@ -118,11 +110,11 @@ const Chat = () => {
                           {channel.name}
                         </Button>
                         <Dropdown.Toggle split className="flex-grow-0" variant={variantBtn}>
-                          <span className="visually-hidden">Управление каналом</span>
+                          <span className="visually-hidden">{t('chat.management')}</span>
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                          <Dropdown.Item onClick={() => dispatch(showModal({ type: 'remove', channel }))}>Удалить</Dropdown.Item>
-                          <Dropdown.Item onClick={() => dispatch(showModal({ type: 'rename', channel }))}>Переименовать</Dropdown.Item>
+                          <Dropdown.Item onClick={() => dispatch(showModal({ type: 'remove', channel }))}>{t('chat.remove')}</Dropdown.Item>
+                          <Dropdown.Item onClick={() => dispatch(showModal({ type: 'rename', channel }))}>{t('chat.rename')}</Dropdown.Item>
                         </Dropdown.Menu>
                       </Dropdown>
                     </Nav.Item>
@@ -149,10 +141,9 @@ const Chat = () => {
                   </b>
                 </p>
                 <span className="text-muted">
-                  {messages.ids
-                    .filter((id) => messages.entities[id].channelId === channels.currentChannelId)
-                    .length}
-                  {' сообщений'}
+                  {countMessages()}
+                  {' '}
+                  {t('chat.message', { count: countMessages() })}
                 </span>
               </div>
               <div id="messages-box" className="chat-messages overflow-auto px-5 ">
@@ -177,8 +168,8 @@ const Chat = () => {
                     <Form.Control
                       ref={inputRef}
                       name="body"
-                      aria-label="Новое сообщение"
-                      placeholder="Введите сообщение..."
+                      aria-label={t('chat.ariaLabel')}
+                      placeholder={t('chat.placeholder')}
                       className="border-0 p-0 ps-2"
                       onChange={formik.handleChange}
                       value={formik.values.body}
@@ -187,7 +178,7 @@ const Chat = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
                         <path fillRule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
                       </svg>
-                      <span className="visually-hidden">Отправить</span>
+                      <span className="visually-hidden">{t('chat.send')}</span>
                     </Button>
                   </InputGroup>
                 </Form>

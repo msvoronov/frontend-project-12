@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import { Modal, Form, Button } from 'react-bootstrap';
 import * as yup from 'yup';
+import { useTranslation } from 'react-i18next';
 import { sendRenameChannel } from '../slices/channelsSlice.js';
 import { hideModal } from '../slices/modalSlice.js';
 
@@ -12,6 +13,7 @@ const Rename = (props) => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
+  const { t } = useTranslation();
   const channelsName = Object.values(channels.entities)
     .map((channel) => channel.name);
 
@@ -24,10 +26,10 @@ const Rename = (props) => {
   const schema = yup.object().shape({
     name: yup
       .string()
-      .min(3, 'От 3 до 20 символов')
-      .max(20, 'От 3 до 20 символов')
-      .required('Обязательное поле')
-      .notOneOf(channelsName, 'Должно быть уникальным'),
+      .min(3, t('rename.schema.min3'))
+      .max(20, t('rename.schema.max20'))
+      .required(t('rename.schema.required'))
+      .notOneOf(channelsName, t('rename.schema.mustUnique')),
   });
 
   const formik = useFormik({
@@ -45,7 +47,7 @@ const Rename = (props) => {
     <Modal show aria-labelledby="contained-modal-title-vcenter" centered onHide={() => dispatch(hideModal())}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Переименовать канал
+          {t('rename.title')}
         </Modal.Title>
       </Modal.Header>
 
@@ -61,11 +63,11 @@ const Rename = (props) => {
               name="name"
               isInvalid={formik.errors.name && formik.touched.name}
             />
-            <Form.Label visuallyHidden>Имя канала</Form.Label>
+            <Form.Label visuallyHidden>{t('rename.name')}</Form.Label>
             <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
             <div className="d-flex justify-content-end">
-              <Button type="button" variant="secondary" className="me-2" onClick={() => dispatch(hideModal())}>Отменить</Button>
-              <Button type="submit" variant="primary">Отправить</Button>
+              <Button type="button" variant="secondary" className="me-2" onClick={() => dispatch(hideModal())}>{t('rename.cancel')}</Button>
+              <Button type="submit" variant="primary">{t('rename.send')}</Button>
             </div>
           </Form.Group>
         </Form>
