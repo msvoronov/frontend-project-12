@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import { Modal, Form, Button } from 'react-bootstrap';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import { sendNewChannel } from '../slices/channelsSlice.js';
 import { hideModal } from '../slices/modalSlice.js';
 
@@ -36,8 +37,14 @@ const Add = () => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: values.name };
-      dispatch(sendNewChannel({ channel, token: auth.token }));
-      dispatch(hideModal());
+      dispatch(sendNewChannel({ channel, token: auth.token }))      
+        .then(() => {
+          dispatch(hideModal());
+          toast.success(t('add.created'));
+        })
+        .catch(() => {
+          toast.error(t('errors.networkError'));
+        });
     },
   });
   return (

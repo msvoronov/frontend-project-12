@@ -1,5 +1,9 @@
 export default {
   translation: {
+    errors: {
+      networkError: 'Ошибка сети. Проверьте подключение',
+      fetchError: 'Ошибка загрузки данных',
+    },
     navbar: {
       logout: 'Выйти',
     },
@@ -53,6 +57,7 @@ export default {
       name: 'Имя канала',
       cancel: 'Отменить',
       send: 'Отправить',
+      created: 'Канал создан',
       schema: {
         required: 'Обязательное поле',
         min3: 'От 3 до 20 символов',
@@ -65,12 +70,14 @@ export default {
       confirmation: 'Уверены?',
       cancel: 'Отменить',
       send: 'Удалить',
+      removed: 'Канал удалён',
     },
     rename: {
       title: 'Переименовать канал',
       name: 'Имя канала',
       cancel: 'Отменить',
       send: 'Отправить',
+      renamed: 'Канал переименован',
       schema: {
         required: 'Обязательное поле',
         min3: 'От 3 до 20 символов',

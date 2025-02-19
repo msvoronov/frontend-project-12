@@ -6,6 +6,7 @@ import {
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import {
   changeChannel, getChannels, addChannel, renameChannel, removeChannel,
 } from '../slices/channelsSlice.js';
@@ -26,8 +27,14 @@ const Chat = () => {
 
   useEffect(() => {
     if (channels.ids.length === 0) {
-      dispatch(getChannels(auth.token));
-      dispatch(getMessages(auth.token));
+      dispatch(getChannels(auth.token))
+        .catch(() => {
+          toast.error(t('errors.fetchError'));
+        });
+      dispatch(getMessages(auth.token))
+        .catch(() => {
+          toast.error(t('errors.fetchError'));
+        });
     }
   }, [auth.token, dispatch, channels.ids.length]);
 

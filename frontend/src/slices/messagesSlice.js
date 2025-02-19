@@ -15,7 +15,8 @@ export const getMessages = createAsyncThunk(
 export const sendMessage = createAsyncThunk(
   'messages/sendMessage',
   async ({ message, token }) => {
-    await axios.post(apiRoutes.messagesPath(), message, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await axios.post(apiRoutes.messagesPath(), message, { headers: { Authorization: `Bearer ${token}` } });
+    return response.data;
   },
 );
 
@@ -24,6 +25,7 @@ const messagesSlice = createSlice({
   initialState: {
     ids: [],
     entities: {},
+    error: null,
   },
   reducers: {
     addMessage(state, action) {
@@ -47,15 +49,25 @@ const messagesSlice = createSlice({
         state.ids = newIds;
         state.entities = Object.fromEntries(newEntitiess);
       })
+      // fulfilled
       .addCase(getMessages.fulfilled, (state, action) => {
         const messages = action.payload;
         messages.forEach((message) => {
           state.entities[message.id] = message;
           state.ids.push(message.id);
         });
+        state.error = null;
       })
-      .addCase(getMessages.rejected, (state, action) => (console.log(action.error)))
-      .addCase(sendMessage.rejected, (state, action) => (console.log(action.error)));
+      .addCase(sendMessage.fulfilled, (state) => {
+        state.error = null;
+      })
+      // rejected
+      .addCase(getMessages.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
+      .addCase(sendMessage.rejected, (state, action) => {
+        state.error = action.error.message;
+      });
   },
 });
 

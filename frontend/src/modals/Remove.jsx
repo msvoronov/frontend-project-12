@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import { sendRemoveChannel } from '../slices/channelsSlice.js';
 import { hideModal } from '../slices/modalSlice.js';
 
@@ -13,8 +14,14 @@ const Remove = (props) => {
   const { t } = useTranslation();
 
   const removeHandler = () => {
-    dispatch(sendRemoveChannel({ id: processedChannel.id, token: auth.token }));
-    dispatch(hideModal());
+    dispatch(sendRemoveChannel({ id: processedChannel.id, token: auth.token }))
+      .then(() => {
+        dispatch(hideModal());
+        toast.success(t('remove.removed'));
+      })
+      .catch(() => {
+        toast.error(t('errors.networkError'));
+      });
   };
 
   return (
