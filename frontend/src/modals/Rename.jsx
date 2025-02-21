@@ -5,6 +5,7 @@ import { Modal, Form, Button } from 'react-bootstrap';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import filter from 'leo-profanity';
 import { sendRenameChannel } from '../slices/channelsSlice.js';
 import { hideModal } from '../slices/modalSlice.js';
 
@@ -39,7 +40,7 @@ const Rename = (props) => {
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: (values) => {
-      const channel = { name: values.name, id: processedChannel.id };
+      const channel = { name: filter.clean(values.name), id: processedChannel.id };
       dispatch(sendRenameChannel({ channel, token: auth.token }))      
         .then(() => {
           dispatch(hideModal());

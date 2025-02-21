@@ -5,6 +5,7 @@ import { Modal, Form, Button } from 'react-bootstrap';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import filter from 'leo-profanity';
 import { sendNewChannel } from '../slices/channelsSlice.js';
 import { hideModal } from '../slices/modalSlice.js';
 
@@ -36,7 +37,7 @@ const Add = () => {
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: (values) => {
-      const channel = { name: values.name };
+      const channel = { name: filter.clean(values.name) };
       dispatch(sendNewChannel({ channel, token: auth.token }))      
         .then(() => {
           dispatch(hideModal());

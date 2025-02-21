@@ -7,6 +7,7 @@ import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import filter from 'leo-profanity';
 import {
   changeChannel, getChannels, addChannel, renameChannel, removeChannel,
 } from '../slices/channelsSlice.js';
@@ -24,6 +25,8 @@ const Chat = () => {
   const { socket } = useApi();
   const inputRef = useRef();
   const { t } = useTranslation();
+
+  filter.loadDictionary('ru');
 
   useEffect(() => {
     if (channels.ids.length === 0) {
@@ -80,7 +83,7 @@ const Chat = () => {
     validateOnMount: true, // проверяем даже при первом рендере
     onSubmit: (values, { resetForm }) => {
       const message = {
-        body: values.body,
+        body: filter.clean(values.body),
         channelId: channels.currentChannelId,
         username: auth.username,
       };
