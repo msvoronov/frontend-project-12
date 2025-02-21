@@ -5,29 +5,28 @@
 A simplified version of Slack chat.
 Created on React & Redux. Build with vite.
 
-App available on Render
-https://slack-chat-n33b.onrender.com/
+App available on [Render](https://slack-chat-n33b.onrender.com/)
 
-## Clone repository
+### Clone repository
 
 ```bash
 git clone https://github.com/msvoronov/frontend-project-12.git
 ```
 
-## Setup
+### Setup
 
 ```bash
 make install
 npm run postinstall
 ```
 
-## Build frontend
+### Build frontend
 
 ```bash
 make build
 ```
 
-## Start backend
+### Start backend
 
 ```bash
 make start
