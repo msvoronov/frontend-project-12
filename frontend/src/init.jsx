@@ -6,7 +6,8 @@ import store from './slices/index.js';
 import App from './App';
 import resources from './locales/index.js';
 
-i18next
+const init = async () => {
+  await i18next
   .use(initReactI18next)
   .init({
     resources,
@@ -17,14 +18,15 @@ i18next
     },
   });
 
-const init = () => (
-  <ApiContextProvider>
-    <I18nextProvider i18n={i18next}>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </I18nextProvider>
-  </ApiContextProvider>
-);
+  return (
+    <ApiContextProvider>
+      <I18nextProvider i18n={i18next}>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </I18nextProvider>
+    </ApiContextProvider>
+  );
+}
 
 export default init;
