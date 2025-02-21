@@ -8,15 +8,15 @@ import resources from './locales/index.js';
 
 const init = async () => {
   await i18next
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'ru',
-    fallbackLng: 'ru',
-    interpolation: {
-      escapeValue: false,
-    },
-  });
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: 'ru',
+      fallbackLng: 'ru',
+      interpolation: {
+        escapeValue: false,
+      },
+    });
 
   return (
     <ApiContextProvider>
@@ -27,6 +27,6 @@ const init = async () => {
       </I18nextProvider>
     </ApiContextProvider>
   );
-}
+};
 
 export default init;

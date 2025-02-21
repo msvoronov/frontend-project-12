@@ -41,7 +41,7 @@ const Rename = (props) => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: filter.clean(values.name), id: processedChannel.id };
-      dispatch(sendRenameChannel({ channel, token: auth.token }))      
+      dispatch(sendRenameChannel({ channel, token: auth.token }))
         .then(() => {
           dispatch(hideModal());
           toast.success(t('rename.renamed'));

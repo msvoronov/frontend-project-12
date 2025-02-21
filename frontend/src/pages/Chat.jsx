@@ -26,7 +26,7 @@ const Chat = () => {
   const inputRef = useRef();
   const { t } = useTranslation();
 
-  filter.loadDictionary('ru');
+  filter.loadDictionary('en');
 
   useEffect(() => {
     if (channels.ids.length === 0) {
@@ -39,7 +39,7 @@ const Chat = () => {
           toast.error(t('errors.fetchError'));
         });
     }
-  }, [auth.token, dispatch, channels.ids.length]);
+  }, [auth.token, dispatch, channels.ids.length, t]);
 
   useEffect(() => {
     inputRef.current.focus();

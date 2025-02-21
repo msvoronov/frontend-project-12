@@ -39,9 +39,9 @@ const App = () => {
           </div>
           <ToastContainer />
         </BrowserRouter>
-        </ErrorBoundary>
+      </ErrorBoundary>
     </Provider>
   );
-}
+};
 
 export default App;

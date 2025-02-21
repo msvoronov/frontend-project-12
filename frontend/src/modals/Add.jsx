@@ -38,7 +38,7 @@ const Add = () => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: filter.clean(values.name) };
-      dispatch(sendNewChannel({ channel, token: auth.token }))      
+      dispatch(sendNewChannel({ channel, token: auth.token }))
         .then(() => {
           dispatch(hideModal());
           toast.success(t('add.created'));
