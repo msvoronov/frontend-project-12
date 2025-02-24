@@ -1,23 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { apiRoutes } from '../routes/routes.js';
-
-export const logIn = createAsyncThunk(
-  'auth/logIn',
-  async (values) => {
-    const response = await axios.post(apiRoutes.loginPath(), values);
-    return response.data;
-  },
-);
-export const signUp = createAsyncThunk(
-  'auth/signUp',
-  async (values) => {
-    const response = await axios.post(apiRoutes.signupPath(), values);
-    return response.data;
-  },
-);
+import { createSlice } from '@reduxjs/toolkit';
 
 const isLoggedIn = () => !!localStorage.getItem('auth');
 
@@ -27,61 +10,23 @@ const authSlice = createSlice({
     token: isLoggedIn() ? JSON.parse(localStorage.getItem('auth')).token : '',
     username: isLoggedIn() ? JSON.parse(localStorage.getItem('auth')).username : '',
     loggedIn: isLoggedIn(),
-    status: 'idle',
-    error: null,
   },
   reducers: {
-    logOut(state) {
+    setLocalAuth(state, action) {
+      const { token, username } = action.payload;
+      state.token = token;
+      state.username = username;
+      state.loggedIn = true;
+      localStorage.setItem('auth', JSON.stringify(action.payload));
+    },
+    removeLocalAuth(state) {
       state.token = '';
       state.username = '';
       state.loggedIn = false;
-      state.status = 'idle';
-      state.error = null;
       localStorage.removeItem('auth');
     },
   },
-  extraReducers: (builder) => {
-    builder
-      // logIn
-      .addCase(logIn.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(logIn.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.error = null;
-
-        const auth = action.payload;
-        state.token = auth.token;
-        state.username = auth.username;
-        state.loggedIn = true;
-        localStorage.setItem('auth', JSON.stringify(auth));
-      })
-      .addCase(logIn.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message;
-      })
-      // signUp
-      .addCase(signUp.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(signUp.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.error = null;
-
-        const auth = action.payload;
-        state.token = auth.token;
-        state.username = auth.username;
-        state.loggedIn = true;
-        localStorage.setItem('auth', JSON.stringify(auth));
-      })
-      .addCase(signUp.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message;
-      });
-  },
 });
 
-export const { logOut } = authSlice.actions;
+export const { setLocalAuth, removeLocalAuth } = authSlice.actions;
 export default authSlice.reducer;

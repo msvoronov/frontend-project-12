@@ -13,7 +13,7 @@ import { routes } from './routes/routes.js';
 
 const App = () => {
   const rollbarConfig = {
-    accessToken: 'b1de627435e5479aac6cfd879ae3c1b6',
+    accessToken: import.meta.env.VITE_ROLLBAR_ACCESS_TOKEN,
     environment: 'production',
   };
 

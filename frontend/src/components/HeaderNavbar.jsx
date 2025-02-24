@@ -2,7 +2,7 @@ import React from 'react';
 import { Navbar, Container, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { logOut } from '../slices/authSlice.js';
+import { removeLocalAuth } from '../slices/authSlice.js';
 
 const HeaderNavbar = () => {
   const auth = useSelector((state) => state.auth);
@@ -14,7 +14,7 @@ const HeaderNavbar = () => {
       <Container>
         <Navbar.Brand href="/">Hexlet Chat</Navbar.Brand>
         {auth.loggedIn
-          ? <Button type="button" onClick={() => dispatch(logOut())}>{t('navbar.logout')}</Button>
+          ? <Button type="button" onClick={() => dispatch(removeLocalAuth())}>{t('navbar.logout')}</Button>
           : null}
       </Container>
     </Navbar>

@@ -1,37 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import { current, createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { apiRoutes } from '../routes/routes.js';
-
-export const getChannels = createAsyncThunk(
-  'channels/getChannels',
-  async (token) => {
-    const response = await axios.get(apiRoutes.channelsPath(), { headers: { Authorization: `Bearer ${token}` } });
-    return response.data;
-  },
-);
-export const sendNewChannel = createAsyncThunk(
-  'channels/sendNewChannel',
-  async ({ channel, token }) => {
-    const response = await axios.post(apiRoutes.channelsPath(), channel, { headers: { Authorization: `Bearer ${token}` } });
-    return response.data;
-  },
-);
-export const sendRenameChannel = createAsyncThunk(
-  'channels/sendRenameChannel',
-  async ({ channel, token }) => {
-    const response = await axios.patch(apiRoutes.channelPath(channel.id), { name: channel.name }, { headers: { Authorization: `Bearer ${token}` } });
-    return response.data;
-  },
-);
-export const sendRemoveChannel = createAsyncThunk(
-  'channels/sendRemoveChannel',
-  async ({ id, token }) => {
-    const response = await axios.delete(apiRoutes.channelPath(id), { headers: { Authorization: `Bearer ${token}` } });
-    return response.data;
-  },
-);
+import { current, createSlice } from '@reduxjs/toolkit';
 
 const channelsSlice = createSlice({
   name: 'channels',
@@ -66,42 +35,6 @@ const channelsSlice = createSlice({
       state.ids = newIds;
       state.entities = Object.fromEntries(newEntitiess);
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      // fulfilled
-      .addCase(getChannels.fulfilled, (state, action) => {
-        const channels = action.payload;
-        channels.forEach((channel) => {
-          state.entities[channel.id] = channel;
-          state.ids.push(channel.id);
-        });
-        state.error = null;
-      })
-      .addCase(sendNewChannel.fulfilled, (state, action) => {
-        const { id } = action.payload;
-        state.currentChannelId = id;
-        state.error = null;
-      })
-      .addCase(sendRenameChannel.fulfilled, (state) => {
-        state.error = null;
-      })
-      .addCase(sendRemoveChannel.fulfilled, (state) => {
-        state.error = null;
-      })
-      // rejected
-      .addCase(getChannels.rejected, (state, action) => {
-        state.error = action.error.message;
-      })
-      .addCase(sendNewChannel.rejected, (state, action) => {
-        state.error = action.error.message;
-      })
-      .addCase(sendRenameChannel.rejected, (state, action) => {
-        state.error = action.error.message;
-      })
-      .addCase(sendRemoveChannel.rejected, (state, action) => {
-        state.error = action.error.message;
-      });
   },
 });
 

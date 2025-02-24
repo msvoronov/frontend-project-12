@@ -4,14 +4,17 @@ import {
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import avatarLogin from '../assets/avatarLogin.jpg';
 import { routes } from '../routes/routes.js';
-import { logIn } from '../slices/authSlice.js';
+import { useLogInMutation } from '../slices/authApi.js';
+import { setLocalAuth } from '../slices/authSlice.js';
 
 const Login = () => {
   const auth = useSelector((state) => state.auth);
+  const [logIn, { data, error }] = useLogInMutation();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const inputRef = useRef();
@@ -19,17 +22,19 @@ const Login = () => {
 
   useEffect(() => {
     if (auth.loggedIn) navigate(routes.chat);
-  });
+  }, [auth.loggedIn, navigate]);
+
   useEffect(() => {
-    inputRef.current.focus();
-  }, [auth.error]);
+    if (data) dispatch(setLocalAuth(data));
+    if (error) inputRef.current.focus();
+  }, [data, error, dispatch]);
 
   const formik = useFormik({
     initialValues: {
       username: '',
       password: '',
     },
-    onSubmit: (values) => dispatch(logIn(values)),
+    onSubmit: (values) => logIn(values),
   });
   return (
     <div className="container-fluid h-100">
@@ -51,7 +56,7 @@ const Login = () => {
                     ref={inputRef}
                     onChange={formik.handleChange}
                     value={formik.values.username}
-                    isInvalid={auth.status === 'failed'}
+                    isInvalid={error}
                   />
                   <Form.Label>{t('login.username')}</Form.Label>
                 </Form.Group>
@@ -64,7 +69,7 @@ const Login = () => {
                     type="password"
                     onChange={formik.handleChange}
                     value={formik.values.password}
-                    isInvalid={auth.status === 'failed'}
+                    isInvalid={error}
                   />
                   <Form.Label>{t('login.password')}</Form.Label>
                   <Form.Control.Feedback tooltip type="invalid">{t('login.feedback')}</Form.Control.Feedback>
@@ -75,7 +80,7 @@ const Login = () => {
             <Card.Footer className="p-4">
               <div className="text-center">
                 <span>{t('login.noAccount')}</span>
-                <a href="/signup">{t('login.registration')}</a>
+                <Link to="/signup">{t('login.registration')}</Link>
               </div>
             </Card.Footer>
           </Card>

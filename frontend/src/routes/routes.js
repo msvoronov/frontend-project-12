@@ -1,4 +1,4 @@
-const apiPath = '/api/v1';
+export const apiPath = '/api/v1';
 
 export const routes = {
   notFound: '*',
@@ -8,9 +8,9 @@ export const routes = {
 };
 
 export const apiRoutes = {
-  loginPath: () => [apiPath, 'login'].join('/'),
-  signupPath: () => [apiPath, 'signup'].join('/'),
-  channelsPath: () => [apiPath, 'channels'].join('/'),
-  channelPath: (id) => [apiPath, 'channels', id].join('/'),
-  messagesPath: () => [apiPath, 'messages'].join('/'),
+  loginPath: 'login',
+  signupPath: 'signup',
+  channelsPath: 'channels',
+  channelPath: (id) => ['channels', id].join('/'),
+  messagesPath: 'messages',
 };

@@ -6,14 +6,17 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import filter from 'leo-profanity';
-import { sendNewChannel } from '../slices/channelsSlice.js';
+import { useSendNewChannelMutation } from '../slices/channelsApi.js';
 import { hideModal } from '../slices/modalSlice.js';
+import { removeLocalAuth } from '../slices/authSlice.js';
 
 const Add = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const [sendNewChannel, { data, error }] = useSendNewChannelMutation();
   const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
-  const { t } = useTranslation();
   const channelsName = Object.values(channels.entities)
     .map((channel) => channel.name);
 
@@ -21,6 +24,21 @@ const Add = () => {
   useEffect(() => {
     inputRef.current.focus();
   }, []);
+
+  useEffect(() => {
+    if (data) {
+      dispatch(hideModal());
+      toast.success(t('add.created'));
+    }
+    if (error) {
+      if (error.status === 401) {
+        toast.error(t('errors.fetchError'));
+        dispatch(removeLocalAuth());
+      } else {
+        toast.error(t('errors.networkError'));
+      }
+    }
+  }, [data, error, dispatch, t]);
 
   const schema = yup.object().shape({
     name: yup
@@ -38,14 +56,7 @@ const Add = () => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: filter.clean(values.name) };
-      dispatch(sendNewChannel({ channel, token: auth.token }))
-        .then(() => {
-          dispatch(hideModal());
-          toast.success(t('add.created'));
-        })
-        .catch(() => {
-          toast.error(t('errors.networkError'));
-        });
+      sendNewChannel({ token: auth.token, channel });
     },
   });
   return (

@@ -6,16 +6,18 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import filter from 'leo-profanity';
-import { sendRenameChannel } from '../slices/channelsSlice.js';
+import { useSendRenameChannelMutation } from '../slices/channelsApi.js';
 import { hideModal } from '../slices/modalSlice.js';
+import { removeLocalAuth } from '../slices/authSlice.js';
 
-const Rename = (props) => {
-  const { processedChannel } = props;
-
+const Rename = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const [sendRenameChannel, { data, error }] = useSendRenameChannelMutation();
+  const { processedChannel } = useSelector((state) => state.modal);
   const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
-  const { t } = useTranslation();
   const channelsName = Object.values(channels.entities)
     .map((channel) => channel.name);
 
@@ -24,6 +26,21 @@ const Rename = (props) => {
     inputRef.current.focus();
     inputRef.current.select();
   }, []);
+
+  useEffect(() => {
+    if (data) {
+      dispatch(hideModal());
+      toast.success(t('rename.renamed'));
+    }
+    if (error) {
+      if (error.status === 401) {
+        toast.error(t('errors.fetchError'));
+        dispatch(removeLocalAuth());
+      } else {
+        toast.error(t('errors.networkError'));
+      }
+    }
+  }, [data, error, dispatch, t]);
 
   const schema = yup.object().shape({
     name: yup
@@ -41,14 +58,7 @@ const Rename = (props) => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: filter.clean(values.name), id: processedChannel.id };
-      dispatch(sendRenameChannel({ channel, token: auth.token }))
-        .then(() => {
-          dispatch(hideModal());
-          toast.success(t('rename.renamed'));
-        })
-        .catch(() => {
-          toast.error(t('errors.networkError'));
-        });
+      sendRenameChannel({ token: auth.token, channel });
     },
   });
   return (

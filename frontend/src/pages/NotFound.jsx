@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import page404 from '../assets/page404.svg';
 
@@ -11,7 +12,7 @@ const NotFound = () => {
       <h1 className="h4 text-muted">{t('notFound.title')}</h1>
       <p className="text-muted">
         {t('notFound.goTo')}
-        <a href="/">{t('notFound.toMainPage')}</a>
+        <Link to="/">{t('notFound.toMainPage')}</Link>
       </p>
     </div>
   );

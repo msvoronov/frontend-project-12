@@ -4,15 +4,18 @@ import {
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import avatarSignup from '../assets/avatarSignup.jpg';
 import { routes } from '../routes/routes.js';
-import { signUp } from '../slices/authSlice.js';
+import { useSignUpMutation } from '../slices/authApi.js';
+import { setLocalAuth } from '../slices/authSlice.js';
 
 const Signup = () => {
   const auth = useSelector((state) => state.auth);
+  const [signUp, { data, error }] = useSignUpMutation();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const inputRef = useRef();
@@ -20,10 +23,12 @@ const Signup = () => {
 
   useEffect(() => {
     if (auth.loggedIn) navigate(routes.chat);
-  });
+  }, [auth.loggedIn, navigate]);
+
   useEffect(() => {
-    inputRef.current.focus();
-  }, [auth.error]);
+    if (data) dispatch(setLocalAuth(data));
+    if (error) inputRef.current.focus();
+  }, [data, error, dispatch]);
 
   const schema = yup.object().shape({
     username: yup
@@ -47,10 +52,10 @@ const Signup = () => {
       confirmPassword: '',
     },
     validationSchema: schema,
-    onSubmit: (values) => dispatch(signUp(values)),
+    onSubmit: (values) => signUp(values),
   });
-  const isInputInvalid = (input) => auth.status === 'failed' || (formik.errors[input] && formik.touched[input]);
-  const feedabckErrorText = (defaultText) => (auth.error === 'Request failed with status code 409'
+  const isInputInvalid = (input) => error || (formik.errors[input] && formik.touched[input]);
+  const feedabckErrorText = (defaultText) => (error?.status === 409
     ? t('signup.errors.alreadyExists')
     : defaultText);
 
@@ -78,7 +83,7 @@ const Signup = () => {
                     isInvalid={isInputInvalid('username')}
                   />
                   <Form.Label>{t('signup.username')}</Form.Label>
-                  {auth.status === 'failed'
+                  {error
                     ? null
                     : <Form.Control.Feedback tooltip type="invalid" placement="right">{formik.errors.username}</Form.Control.Feedback>}
                 </Form.Group>
@@ -96,7 +101,7 @@ const Signup = () => {
                     isInvalid={isInputInvalid('password')}
                   />
                   <Form.Label>{t('signup.password')}</Form.Label>
-                  {auth.status === 'failed'
+                  {error
                     ? null
                     : <Form.Control.Feedback tooltip type="invalid">{formik.errors.password}</Form.Control.Feedback>}
                 </Form.Group>
@@ -121,7 +126,7 @@ const Signup = () => {
             <Card.Footer className="p-4">
               <div className="text-center">
                 <span>{t('signup.hasAccount')}</span>
-                <a href="/login">{t('signup.enter')}</a>
+                <Link to="/login">{t('signup.enter')}</Link>
               </div>
             </Card.Footer>
           </Card>
