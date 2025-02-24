@@ -9,6 +9,7 @@ import filter from 'leo-profanity';
 import { useSendNewChannelMutation } from '../slices/channelsApi.js';
 import { hideModal } from '../slices/modalSlice.js';
 import { removeLocalAuth } from '../slices/authSlice.js';
+import { changeChannel } from '../slices/channelsSlice.js';
 
 const Add = () => {
   const dispatch = useDispatch();
@@ -28,6 +29,7 @@ const Add = () => {
   useEffect(() => {
     if (data) {
       dispatch(hideModal());
+      dispatch(changeChannel(data));
       toast.success(t('add.created'));
     }
     if (error) {
