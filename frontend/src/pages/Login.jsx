@@ -2,20 +2,18 @@ import React, { useEffect, useRef } from 'react';
 import {
   Button, Form, Card, Image,
 } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import avatarLogin from '../assets/avatarLogin.jpg';
 import { routes } from '../routes/routes.js';
-import { useLogInMutation } from '../slices/authApi.js';
-import { setLocalAuth } from '../slices/authSlice.js';
+import { useLogIn } from '../services/api.js';
 
 const Login = () => {
   const auth = useSelector((state) => state.auth);
-  const [logIn, { data, error }] = useLogInMutation();
+  const [logIn, { error }] = useLogIn();
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const inputRef = useRef();
   const { t } = useTranslation();
@@ -25,9 +23,8 @@ const Login = () => {
   }, [auth.loggedIn, navigate]);
 
   useEffect(() => {
-    if (data) dispatch(setLocalAuth(data));
     if (error) inputRef.current.focus();
-  }, [data, error, dispatch]);
+  }, [error]);
 
   const formik = useFormik({
     initialValues: {

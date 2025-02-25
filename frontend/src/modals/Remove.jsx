@@ -3,19 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { useSendRemoveChannelMutation } from '../slices/channelsApi.js';
+import { useSendRemoveChannel } from '../services/api.js';
 import { hideModal } from '../slices/modalSlice.js';
 import { removeLocalAuth } from '../slices/authSlice.js';
 
 const Remove = () => {
   const { processedChannel } = useSelector((state) => state.modal);
-  const auth = useSelector((state) => state.auth);
 
-  const [sendRemoveChannel, { data, error }] = useSendRemoveChannelMutation();
+  const [sendRemoveChannel, { data, error }] = useSendRemoveChannel();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const removeHandler = () => sendRemoveChannel({ token: auth.token, id: processedChannel.id });
+  const removeHandler = () => sendRemoveChannel(processedChannel.id);
 
   useEffect(() => {
     if (data) {

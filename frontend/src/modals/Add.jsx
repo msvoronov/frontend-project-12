@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import filter from 'leo-profanity';
-import { useSendNewChannelMutation } from '../slices/channelsApi.js';
+import { useSendNewChannel } from '../services/api.js';
 import { hideModal } from '../slices/modalSlice.js';
 import { removeLocalAuth } from '../slices/authSlice.js';
 import { changeChannel } from '../slices/channelsSlice.js';
@@ -15,8 +15,7 @@ const Add = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const [sendNewChannel, { data, error }] = useSendNewChannelMutation();
-  const auth = useSelector((state) => state.auth);
+  const [sendNewChannel, { data, error }] = useSendNewChannel();
   const channels = useSelector((state) => state.channels);
   const channelsName = Object.values(channels.entities)
     .map((channel) => channel.name);
@@ -58,7 +57,7 @@ const Add = () => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: filter.clean(values.name) };
-      sendNewChannel({ token: auth.token, channel });
+      sendNewChannel(channel);
     },
   });
   return (

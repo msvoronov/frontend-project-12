@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import { current, createSlice } from '@reduxjs/toolkit';
+import { api } from '../services/api.js';
 
 const channelsSlice = createSlice({
   name: 'channels',
@@ -8,7 +9,6 @@ const channelsSlice = createSlice({
     ids: [],
     entities: {},
     currentChannelId: '1',
-    error: null,
   },
   reducers: {
     changeChannel(state, action) {
@@ -35,6 +35,16 @@ const channelsSlice = createSlice({
       state.ids = newIds;
       state.entities = Object.fromEntries(newEntitiess);
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addMatcher(
+        api.endpoints.getChannels.matchFulfilled,
+        (state, action) => (action.payload.forEach((channel) => {
+          state.entities[channel.id] = channel;
+          state.ids.push(channel.id);
+        })),
+      );
   },
 });
 

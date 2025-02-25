@@ -2,6 +2,7 @@
 
 import { current, createSlice } from '@reduxjs/toolkit';
 import { removeChannel } from './channelsSlice.js';
+import { api } from '../services/api.js';
 
 const messagesSlice = createSlice({
   name: 'messages',
@@ -30,7 +31,14 @@ const messagesSlice = createSlice({
         const newIds = newEntitiess.map(([id]) => id);
         state.ids = newIds;
         state.entities = Object.fromEntries(newEntitiess);
-      });
+      })
+      .addMatcher(
+        api.endpoints.getMessages.matchFulfilled,
+        (state, action) => (action.payload.forEach((message) => {
+          state.entities[message.id] = message;
+          state.ids.push(message.id);
+        })),
+      );
   },
 });
 

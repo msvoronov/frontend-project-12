@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import filter from 'leo-profanity';
-import { useSendRenameChannelMutation } from '../slices/channelsApi.js';
+import { useSendRenameChannel } from '../services/api.js';
 import { hideModal } from '../slices/modalSlice.js';
 import { removeLocalAuth } from '../slices/authSlice.js';
 
@@ -14,9 +14,8 @@ const Rename = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const [sendRenameChannel, { data, error }] = useSendRenameChannelMutation();
+  const [sendRenameChannel, { data, error }] = useSendRenameChannel();
   const { processedChannel } = useSelector((state) => state.modal);
-  const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
   const channelsName = Object.values(channels.entities)
     .map((channel) => channel.name);
@@ -58,7 +57,7 @@ const Rename = () => {
     validateOnChange: false,
     onSubmit: (values) => {
       const channel = { name: filter.clean(values.name), id: processedChannel.id };
-      sendRenameChannel({ token: auth.token, channel });
+      sendRenameChannel(channel);
     },
   });
   return (

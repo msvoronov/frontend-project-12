@@ -2,21 +2,19 @@ import React, { useEffect, useRef } from 'react';
 import {
   Button, Form, Card, Image, Row,
 } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import avatarSignup from '../assets/avatarSignup.jpg';
 import { routes } from '../routes/routes.js';
-import { useSignUpMutation } from '../slices/authApi.js';
-import { setLocalAuth } from '../slices/authSlice.js';
+import { useSignUp } from '../services/api.js';
 
 const Signup = () => {
   const auth = useSelector((state) => state.auth);
-  const [signUp, { data, error }] = useSignUpMutation();
+  const [signUp, { error }] = useSignUp();
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const inputRef = useRef();
   const { t } = useTranslation();
@@ -26,9 +24,8 @@ const Signup = () => {
   }, [auth.loggedIn, navigate]);
 
   useEffect(() => {
-    if (data) dispatch(setLocalAuth(data));
     if (error) inputRef.current.focus();
-  }, [data, error, dispatch]);
+  }, [error]);
 
   const schema = yup.object().shape({
     username: yup

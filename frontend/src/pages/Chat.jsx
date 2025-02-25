@@ -8,15 +8,14 @@ import { useFormik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import filter from 'leo-profanity';
+import { io } from 'socket.io-client';
 import {
   addChannel, renameChannel, removeChannel,
 } from '../slices/channelsSlice.js';
-import { useGetMessagesMutation, useSendMessageMutation } from '../slices/messagesApi.js';
-import { useGetChannelsMutation } from '../slices/channelsApi.js';
+import { useGetMessages, useSendMessage, useGetChannels } from '../services/api.js';
 import { addMessage } from '../slices/messagesSlice.js';
 import { removeLocalAuth } from '../slices/authSlice.js';
 import getModal from '../modals/index.js';
-import useApi from '../hooks/useApi.js';
 import Channels from './chat/Channels.jsx';
 import Messages from './chat/Messages.jsx';
 
@@ -24,40 +23,17 @@ const Chat = () => {
   const modal = useSelector((state) => state.modal);
   const auth = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels);
-  const [sendMessage] = useSendMessageMutation();
-  const [
-    getMessages,
-    { data: getMessagesData, error: getMessagesError },
-  ] = useGetMessagesMutation();
-  const [
-    getChannels,
-    { data: getChannelsData, error: getChannelsError },
-  ] = useGetChannelsMutation();
 
   const dispatch = useDispatch();
-  const { socket } = useApi();
   const inputRef = useRef();
   const { t } = useTranslation();
+  const [sendMessage] = useSendMessage();
 
+  const { error: getMessagesError } = useGetMessages();
+  const { error: getChannelsError } = useGetChannels();
   useEffect(() => {
-    if (channels.ids.length === 0) {
-      getChannels(auth.token);
-      getMessages(auth.token);
-    }
-  }, [auth.token, channels.ids.length, getChannels, getMessages]);
-  useEffect(() => {
-    if (getChannelsData) {
-      getChannelsData.forEach((channel) => dispatch(addChannel(channel)));
-    }
-  }, [getChannelsData, dispatch]);
-  useEffect(() => {
-    if (getMessagesData) {
-      getMessagesData.forEach((message) => dispatch(addMessage(message)));
-    }
-  }, [getMessagesData, dispatch]);
-  useEffect(() => {
-    if (getMessagesError || getChannelsError) {
-      const error = getMessagesError || getChannelsError;
+    const error = getMessagesError || getChannelsError;
+    if (error) {
       if (error.status === 401) {
         toast.error(t('errors.fetchError'));
         dispatch(removeLocalAuth());
@@ -68,16 +44,16 @@ const Chat = () => {
   }, [getChannelsError, getMessagesError, dispatch, t]);
 
   useEffect(() => {
+    const socket = io();
     socket.on('newMessage', (payload) => dispatch(addMessage(payload)));
     socket.on('newChannel', (payload) => dispatch(addChannel(payload)));
     socket.on('renameChannel', (payload) => dispatch(renameChannel(payload)));
     socket.on('removeChannel', (payload) => dispatch(removeChannel(payload)));
 
-    // Выполняется при размонтировании компонента
     return () => {
       socket.disconnect(); // вместо нескольких socket.off()
     };
-  }, [dispatch, socket]);
+  }, [dispatch]);
 
   useEffect(() => {
     inputRef.current.focus();
@@ -106,7 +82,7 @@ const Chat = () => {
         channelId: channels.currentChannelId,
         username: auth.username,
       };
-      sendMessage({ token: auth.token, message });
+      sendMessage(message);
       resetForm();
     },
   });
