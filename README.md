@@ -10,7 +10,7 @@ App available on [Render](https://slack-chat-n33b.onrender.com/)
 ### Clone repository
 
 ```bash
-git clone https://github.com/msvoronov/frontend-project-12.git
+git clone https://github.com/msvoronov/slack-chat.git
 ```
 
 ### Setup
